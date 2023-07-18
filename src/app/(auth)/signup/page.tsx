@@ -2,7 +2,7 @@ import SignupForm from '@/components/auth/SignupForm'
 import LandingHeader from '@/components/landing/LandingHeader'
 import React from 'react'
 
-const page = () => {
+const Page = () => {
   return (
         <>
         <LandingHeader />
@@ -11,4 +11,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page
