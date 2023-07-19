@@ -4,10 +4,13 @@ import { faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import axios from 'axios'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React, { useRef, useState } from 'react'
 
 const SignupForm = () => {
 
+
+    const router = useRouter()
     const [eye, setEye] = useState(false)
 
     const name = useRef('')
@@ -31,7 +34,11 @@ const SignupForm = () => {
 
             })
 
-            console.log(data);
+            if (data.status.code === '200') {
+
+                router.push('/login')
+
+            }
 
         } catch (error) {
 

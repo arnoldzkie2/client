@@ -4,24 +4,37 @@ import { faEllipsis, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useState } from 'react'
 
+
+interface Task {
+    id: string
+    name: string
+    description: string
+    created_at: string
+    updated_at: string
+    completed: boolean
+    category_id: string
+    user_id: string
+}
+
 interface Props {
-    task: {
-        id: string;
-        title: string;
-        description: string;
-        category: string;
-        created_at: string;
-        completed: boolean;
-    }[]
+    task: Task[]
     searchQuery: string
 
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>
 
+    setViewTask: React.Dispatch<React.SetStateAction<Task>>
+
+    deleteTask: (ID: string) => Promise<void>
+
+    openUpdateTask: (task: Task) => void
+
 }
 
-const AllTask: React.FC<Props> = ({ task, searchQuery, setSearchQuery }) => {
+const AllTask: React.FC<Props> = ({ task, searchQuery, setSearchQuery, setViewTask, deleteTask, openUpdateTask }) => {
 
     const [completed, setCompleted] = useState(false)
+    const [option, setOption] = useState(false)
+    const [selectedTask, setSelectedTask] = useState('')
 
     const filteredTask = completed ? task.filter(item => item.completed === true) : task
 
@@ -43,18 +56,20 @@ const AllTask: React.FC<Props> = ({ task, searchQuery, setSearchQuery }) => {
             <div className='gap-5 md:gap-10 flex flex-wrap justify-center w-full'>
                 {filteredTask && filteredTask.map(item => (
                     <div key={item.id} className='bg-white shadow-xl border-t flex flex-col gap-3 rounded-xl p-5 w-full border-blue-600 sm:w-2/5 relative'>
-                        <h1 className='text-lg font-medium text-gray-700'>{item.title}</h1>
+                        <h1 className='text-lg font-medium text-gray-700'>{item.name}</h1>
                         <p>{item.description}</p>
                         <div className='mt-auto pt-3 flex items-center justify-between'>
                             <small className='text-gray-500'>{item.created_at}</small>
                             <div className='flex items-center gap-5'>
                                 <span className={`w-4 h-4 rounded-full ${item.completed ? 'bg-green-500' : 'bg-red-600'}`}></span>
-                                <FontAwesomeIcon icon={faEllipsis} className='text-3xl cursor-pointer hover:text-blue-600' />
-                                <ul className={`absolute bg-white p-4 flex-col gap-3 right-0 bottom-0 shadow-xl rounded-xl hidden`}>
-                                    <li className='flex items-center text-gray-700 cursor-pointer gap-2 hover:text-green-500'>View <FontAwesomeIcon icon={faEye} /></li>
-                                    <li className='flex items-center text-gray-700 cursor-pointer gap-2 hover:text-blue-600'>Update <FontAwesomeIcon icon={faPenToSquare} /></li>
-                                    <li className='flex items-center text-gray-700 cursor-pointer gap-2 hover:text-red-600'>Delete <FontAwesomeIcon icon={faTrash} /></li>
-                                    <li className='mt-3 pt-3 border-t text-black cursor-pointer flex items-center gap-3'>Close <FontAwesomeIcon icon={faXmark} className='text-xl' /></li>
+                                <FontAwesomeIcon icon={faEllipsis} className='text-3xl cursor-pointer hover:text-blue-600' onClick={() => {
+                                    setSelectedTask(item.id)
+                                }} />
+                                <ul className={`absolute bg-white p-4 flex-col gap-3 right-0 bottom-0 shadow-xl rounded-xl ${selectedTask === item.id ? 'flex' : 'hidden'}`}>
+                                    <li className='flex items-center text-gray-700 cursor-pointer gap-2 hover:text-green-500' onClick={() => setViewTask(item)}>View <FontAwesomeIcon icon={faEye} /></li>
+                                    <li className='flex items-center text-gray-700 cursor-pointer gap-2 hover:text-blue-600' onClick={() => openUpdateTask(item)}>Update <FontAwesomeIcon icon={faPenToSquare} /></li>
+                                    <li className='flex items-center text-gray-700 cursor-pointer gap-2 hover:text-red-600' onClick={() => deleteTask(item.id)}>Delete <FontAwesomeIcon icon={faTrash} /></li>
+                                    <li className='mt-3 pt-3 border-t text-black cursor-pointer flex items-center gap-3' onClick={() => setSelectedTask('')}>Close <FontAwesomeIcon icon={faXmark} className='text-xl' /></li>
                                 </ul>
                             </div>
 

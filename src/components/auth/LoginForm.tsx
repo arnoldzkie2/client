@@ -4,9 +4,12 @@ import { faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import axios from 'axios'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React, { useRef, useState } from 'react'
 
 const LoginForm = () => {
+
+    const router = useRouter()
 
     const [eye, setEye] = useState(false)
 
@@ -15,24 +18,41 @@ const LoginForm = () => {
     const password = useRef('')
 
     const loginUser = async (e: any) => {
+        
+        e.preventDefault();
 
-        e.prevent.default()
-
-        if (!email || !password) return alert('Fill up the form!')
+        if (!email || !password) return alert('Fill up the form!');
 
         try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user: { email, password },
+                }),
+            });
 
-            const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login`)
+            const data = await response.json();
 
-            console.log(data);
+            if (response.status === 200 && data.status.code === '200') {
 
+                const user = {
+                    name: data.status.data.user.name,
+                    token: response.headers.get('authorization'),
+                };
+
+                localStorage.setItem('user', JSON.stringify(user))
+
+                router.push('/dashboard')
+
+            }
         } catch (error) {
-
             console.log(error);
-
         }
+    };
 
-    }
 
     return (
         <main className="bg-[url(/auth.svg)] bg-no-repeat w-screen h-screen bg-cover bg-center pt-24 px-5 sm:px-10 md:px-16 lg:px-24 xl:px-36">
