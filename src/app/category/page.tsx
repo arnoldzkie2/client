@@ -5,6 +5,7 @@ import NewCategoryModal from '@/components/category/NewCategoryModal'
 import UpdateCategoryModal from '@/components/category/UpdateCategoryModal'
 import Header from '@/components/home/Header'
 import axios from 'axios'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 
@@ -17,6 +18,8 @@ export interface Category {
 }
 
 const Page = () => {
+
+  const router = useRouter()
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -36,73 +39,7 @@ const Page = () => {
 
   const [isUpdating, setIsUpdating] = useState(false)
 
-  const [allCategory, setAllCategory] = useState<Category[]>([
-    {
-      id: "1",
-      name: "Category 1",
-      created_at: "2023-07-20",
-      updated_at: "2023-07-20",
-      user_id: "user1",
-    },
-    {
-      id: "2",
-      name: "Category 2",
-      created_at: "2023-07-20",
-      updated_at: "2023-07-20",
-      user_id: "user1",
-    },
-    {
-      id: "3",
-      name: "Category 3",
-      created_at: "2023-07-20",
-      updated_at: "2023-07-20",
-      user_id: "user2",
-    },
-    {
-      id: "4",
-      name: "Category 4",
-      created_at: "2023-07-20",
-      updated_at: "2023-07-20",
-      user_id: "user1",
-    },
-    {
-      id: "5",
-      name: "Category 5",
-      created_at: "2023-07-20",
-      updated_at: "2023-07-20",
-      user_id: "user1",
-    },
-    {
-      id: "6",
-      name: "Category 6",
-      created_at: "2023-07-20",
-      updated_at: "2023-07-20",
-      user_id: "user2",
-    },
-    {
-      id: "7",
-      name: "Category 7",
-      created_at: "2023-07-20",
-      updated_at: "2023-07-20",
-      user_id: "user1",
-    },
-    {
-      id: "8",
-      name: "Category 8",
-      created_at: "2023-07-20",
-      updated_at: "2023-07-20",
-      user_id: "user1",
-    },
-    {
-      id: "9",
-      name: "Category 9",
-      created_at: "2023-07-20",
-      updated_at: "2023-07-20",
-      user_id: "user2",
-    },
-
-  ])
-
+  const [allCategory, setAllCategory] = useState<Category[]>([])
 
   const getAllCategory = async () => {
     try {
@@ -138,6 +75,7 @@ const Page = () => {
 
       await getAllCategory()
 
+      setNewCategory(false)
       setCategoryForm('')
 
     } catch (error) {
@@ -153,8 +91,8 @@ const Page = () => {
 
     try {
 
-      const { data } = await axios.patch(`${API_URL}/api/v1/categories`, {
-        name: categoryForm
+      const { data } = await axios.patch(`${API_URL}/api/v1/categories/${updateCategoryForm.id}`, {
+        name: updateCategoryForm.name
       }, {
         headers: {
           Authorization: user.token
@@ -216,7 +154,7 @@ const Page = () => {
 
       if (!currentUser) {
 
-        // router.push('/login')
+        router.push('/login')
 
       } else {
 
