@@ -28,7 +28,7 @@ interface Props {
         id: string
         name: string
         created_at: string
-        udpated_at: string
+        updated_at: string
         user_id: string
     }[]
 

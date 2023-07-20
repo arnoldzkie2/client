@@ -36,7 +36,7 @@ const LoginForm = () => {
 
             const data = await response.json();
 
-            if (response.status === 200 && data.status.code === '200') {
+            if (response.status === 200 && data.status.code === 200) {
 
                 const user = {
                     name: data.status.data.user.name,
@@ -45,10 +45,11 @@ const LoginForm = () => {
 
                 localStorage.setItem('user', JSON.stringify(user))
 
-                router.push('/dashboard')
+                router.push('/task')
 
             }
         } catch (error) {
+
             console.log(error);
         }
     };

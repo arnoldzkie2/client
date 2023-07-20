@@ -1,4 +1,5 @@
 'use client'
+import { Category } from '@/app/category/page'
 import { faEye, faPenToSquare } from '@fortawesome/free-regular-svg-icons'
 import { faEllipsis, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -28,25 +29,39 @@ interface Props {
 
     openUpdateTask: (task: Task) => void
 
+    setNewTask: React.Dispatch<React.SetStateAction<boolean>>
+
+    updateCompleted: (e: any, task: Task) => Promise<void>
+
+    allCategory: Category[]
+
 }
 
-const AllTask: React.FC<Props> = ({ task, searchQuery, setSearchQuery, setViewTask, deleteTask, openUpdateTask }) => {
+const AllTask: React.FC<Props> = ({ allCategory, setNewTask, updateCompleted, task, searchQuery, setSearchQuery, setViewTask, deleteTask, openUpdateTask }) => {
 
     const [completed, setCompleted] = useState(false)
-    const [option, setOption] = useState(false)
+
     const [selectedTask, setSelectedTask] = useState('')
 
-    const filteredTask = completed ? task.filter(item => item.completed === true) : task
+    const [categoryID, setCategeoryID] = useState('')
+
+    const filterByCategory = categoryID ? task.filter(item => item.category_id === categoryID) : task
+
+    const filteredTask = completed ? filterByCategory.filter(item => item.completed === true) : task
 
     return (
         <div className='flex overflow-x-hidden gap-5 md:gap-10 flex-col justify-center px-5 sm:px-10 md:px-16 lg:px-56 xl:px-96 py-36 w-screen'>
-            <div className='w-full flex items-center justify-center gap-5'>
-                <div className='relative w-3/5'>
+            <div className='w-full flex items-center justify-center gap-8'>
+                <div className='relative w-2/5'>
                     <FontAwesomeIcon icon={faSearch} className='absolute top-4 text-gray-600 left-3 text-lg' />
                     <input type="text" value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} placeholder='Search Task' className='w-full py-2.5 px-10 rounded-md border-2 outline-none' />
                 </div>
-                <select className='border-b border-blue-600 py-2.5 px-3 outline-none bg-slate-50'>
-                    <option value="" >All Category</option>
+                <button className='bg-blue-600 text-white px-5 py-2.5 rounded-md' onClick={() => setNewTask(true)}>Create Task</button>
+                <select className='border-b border-blue-600 py-2.5 px-3 outline-none bg-slate-50' value={categoryID} onChange={(e: any) => setCategeoryID(e.target.value)}>
+                    <option value="">All Category</option>
+                    {allCategory.map(item => (  
+                        <option value={item.id} key={item.id}>{item.name}</option>
+                    ))}
                 </select>
                 <div className='flex items-center gap-3'>
                     <label htmlFor="completed" className='cursor-pointer'>Completed</label>
@@ -61,7 +76,7 @@ const AllTask: React.FC<Props> = ({ task, searchQuery, setSearchQuery, setViewTa
                         <div className='mt-auto pt-3 flex items-center justify-between'>
                             <small className='text-gray-500'>{item.created_at}</small>
                             <div className='flex items-center gap-5'>
-                                <span className={`w-4 h-4 rounded-full ${item.completed ? 'bg-green-500' : 'bg-red-600'}`}></span>
+                                <span className={`w-4 h-4 rounded-full cursor-pointer ${item.completed ? 'bg-green-500' : 'bg-red-600'}`} onClick={(e: any) => updateCompleted(e, item)}></span>
                                 <FontAwesomeIcon icon={faEllipsis} className='text-3xl cursor-pointer hover:text-blue-600' onClick={() => {
                                     setSelectedTask(item.id)
                                 }} />

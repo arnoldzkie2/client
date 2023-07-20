@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 import NewCategoryModal from '@/components/category/NewCategoryModal'
-import Header from '@/components/dashboard/Header'
+import Header from '@/components/home/Header'
 import AllTask from '@/components/task/AllTask'
 import TaskModal from '@/components/task/NewTaskModal'
 import UpdateTaskModal from '@/components/task/UpdateTaskModal'
@@ -9,19 +9,12 @@ import ViewTaskModal from '@/components/task/ViewTaskModal'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { Category } from '../category/page'
 
 
 interface User {
     name: string
     token: string
-}
-
-interface Category {
-    id: string
-    name: string
-    created_at: string
-    udpated_at: string
-    user_id: string
 }
 
 interface Task {
@@ -34,19 +27,16 @@ interface Task {
     category_id: string
     user_id: string
 }
+
 const Page = () => {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL
 
     const router = useRouter()
-    const [user, setUser] = useState<User>(() => {
-        const storedUser = localStorage.getItem('user');
-        return storedUser ? JSON.parse(storedUser) : { name: '', token: '' };
-    });
+
+    const [user, setUser] = useState<User>({ name: '', token: '' });
 
     const [newTask, setNewTask] = useState(false)
-
-    const [newCategory, setNewCategory] = useState(false)
 
     const [searchQuery, setSearchQuery] = useState('')
 
@@ -272,8 +262,6 @@ const Page = () => {
         completed: false,
     })
 
-    const [categoryForm, setCategoryForm] = useState('')
-
     const [viewTask, setViewTask] = useState<Task>({
         id: '',
         name: '',
@@ -327,29 +315,46 @@ const Page = () => {
     }
 
     useEffect(() => {
-        getAllTask();
 
-        // const currentUserString = localStorage.getItem('user');
-        // if (!currentUserString) {
+        if (!user.name) {
 
-        //     router.push('/login');
+            const currentUser = JSON.parse(localStorage.getItem('user') as any)
 
-        // } else {
+            if (!currentUser) {
 
-        //     const currentUser = JSON.parse(currentUserString);
+                // router.push('/login')
 
-        // }
+            } else {
 
-    }, []);
+                setUser(currentUser)
+
+            }
+        }
+
+        if (user.name) {
+
+            getAllTask();
+            getAllCategory()
+        }
+
+    }, [user]);
 
 
     const filterSearch = allTask.filter(item => item.name.toUpperCase().includes(searchQuery.toUpperCase()))
 
-    const createTask = async () => {
+    const createTask = async (e: any) => {
+
+        e.preventDefault()
+
+        const { name, description, category_id } = taskForm
 
         try {
 
-            const { data } = await axios.post(`${API_URL}/api/v1/tasks`, { taskForm })
+            const { data } = await axios.post(`${API_URL}/api/v1/tasks`, { name, description, category_id }, {
+                headers: {
+                    Authorization: user.token
+                }
+            })
 
             await getAllTask()
 
@@ -386,38 +391,27 @@ const Page = () => {
         }
     }
 
-    const handleTaskForm = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleTaskForm = (e: any) => {
         const { name, value } = e.target;
         setTaskForm((prevTaskForm) => ({
             ...prevTaskForm,
             [name]: value,
         }));
     };
-    const createCategory = async () => {
+    const handleUpdateTaskForm = (e: any) => {
+        const { name, value, type, checked } = e.target;
 
-        try {
+        // For checkboxes, use 'checked' instead of 'value' to get the boolean value
+        const newValue = type === 'checkbox' ? checked : value;
 
-            const { data } = await axios.post(`${API_URL}/api/v1/categories`, {
-                name: categoryForm
-            }, {
-                headers: {
-                    Authorization: user.token
-                }
-            })
-
-            await getAllCategory()
-            setCategoryForm('')
-            setNewCategory(false)
-
-        } catch (error) {
-
-            console.log(error);
-
-        }
-    }
+        setUpdateTaskForm(prevData => ({
+            ...prevData,
+            [name]: newValue,
+        }));
+    };
 
     const openUpdateTask = (task: Task) => {
-        setTaskForm(task)
+        setUpdateTaskForm(task)
         setIsUpdating(true)
     }
 
@@ -436,17 +430,23 @@ const Page = () => {
         })
     }
 
-    const updateTask = async () => {
+    const updateTask = async (e: any) => {
 
+        e.preventDefault()
+
+        const { id, completed, name, description, category_id } = updateTaskForm
         try {
 
-            const { data } = await axios.patch(`${API_URL}/api/v1/tasks/${updateTaskForm.id}`, updateTaskForm, {
+            const { data } = await axios.patch(`${API_URL}/api/v1/tasks/${id}`, {
+                completed, name, description, category_id
+            }, {
                 headers: {
                     Authorization: user.token
                 }
             })
 
             await getAllTask()
+
             setUpdateTaskForm({
                 id: '',
                 name: '',
@@ -457,6 +457,30 @@ const Page = () => {
                 user_id: '',
                 completed: false,
             })
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+    }
+
+    const updateCompleted = async (e: any, task: Task) => {
+
+        e.preventDefault()
+
+        try {
+
+            const { data } = await axios.patch(`${API_URL}/api/v1/tasks/${task.id}`, {
+                completed: !task.completed
+            }, {
+                headers: {
+                    Authorization: user.token
+                }
+            })
+
+            await getAllTask()
+
         } catch (error) {
 
             console.log(error);
@@ -465,17 +489,16 @@ const Page = () => {
     }
     return (
         <div className='overflow-x-hidden'>
-            <Header setNewTask={setNewTask} setNewCategory={setNewCategory} />
 
-            <AllTask openUpdateTask={openUpdateTask} task={filterSearch} deleteTask={deleteTask} setViewTask={setViewTask} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            <Header />
 
-            {newTask && <TaskModal handleTaskForm={handleTaskForm} allCategory={allCategory} setNewTask={setNewTask} taskForm={taskForm} createTask={createTask} />}
+            <AllTask allCategory={allCategory} updateCompleted={updateCompleted} setNewTask={setNewTask} openUpdateTask={openUpdateTask} task={filterSearch} deleteTask={deleteTask} setViewTask={setViewTask} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-            {newCategory && <NewCategoryModal setNewCategory={setNewCategory} createCategory={createCategory} setCategoryForm={setCategoryForm} />}
+            {newTask && <TaskModal setTaskForm={setTaskForm} handleTaskForm={handleTaskForm} allCategory={allCategory} setNewTask={setNewTask} taskForm={taskForm} createTask={createTask} />}
 
             {viewTask.name && <ViewTaskModal task={viewTask} allCategory={allCategory} setViewTask={setViewTask} />}
 
-            {isUpdating && <UpdateTaskModal updateTask={updateTask} closeUpdateTask={closeUpdateTask} taskForm={taskForm} handleTaskForm={handleTaskForm} allCategory={allCategory} />}
+            {isUpdating && <UpdateTaskModal updateTask={updateTask} closeUpdateTask={closeUpdateTask} taskForm={updateTaskForm} handleUpdateTaskForm={handleUpdateTaskForm} allCategory={allCategory} />}
         </div>
     )
 }

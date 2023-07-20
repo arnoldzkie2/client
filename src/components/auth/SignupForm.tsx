@@ -22,19 +22,19 @@ const SignupForm = () => {
 
         e.preventDefault()
 
-        if (!name || !email || !password || !password) return alert('Fill up all inputs')
+        if (!name.current || !email.current || !password.current || !confirmpassword.current) return alert('Fill up all inputs')
 
-        if (password !== confirmpassword) return alert('Password did not matched!')
+        if (password.current !== confirmpassword.current) return alert('Password did not matched!')
 
         try {
 
             const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/signup`, {
 
-                user: { name, email, password }
+                user: { name: name.current, email: email.current, password: password.current }
 
             })
 
-            if (data.status.code === '200') {
+            if (data.status.code === 200) {
 
                 router.push('/login')
 
