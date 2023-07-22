@@ -30,7 +30,7 @@ const Header: React.FC = ({ }) => {
 
             localStorage.clear()
 
-            router.push('/login')
+            router.push('/')
 
         } catch (error) {
 
@@ -65,7 +65,7 @@ const Header: React.FC = ({ }) => {
                     <FontAwesomeIcon icon={faBoxesStacked} />
                 </Link>
                 <li className='relative'>
-                    <button id="dropdownDividerButton" onClick={() => setIsOpen(prevData => !prevData)} data-dropdown-toggle="dropdownDivider" className=" outline-none rounded-lg px-5 py-2.5 flex items-center">{user.name}<svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <button onClick={() => setIsOpen(prevData => !prevData)} className=" outline-none rounded-lg px-5 py-2.5 flex items-center">{user.name}<svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                     </svg></button>
                     <ul className={`py-2 absolute bg-white shadow ${!open && 'hidden'}`}>

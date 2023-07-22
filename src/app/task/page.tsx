@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import NewCategoryModal from '@/components/category/NewCategoryModal'
 import Header from '@/components/home/Header'
 import AllTask from '@/components/task/AllTask'
 import TaskModal from '@/components/task/NewTaskModal'
@@ -17,7 +16,7 @@ interface User {
     token: string
 }
 
-interface Task {
+export interface Task {
     id: string
     name: string
     description: string
@@ -40,10 +39,119 @@ const Page = () => {
 
     const [searchQuery, setSearchQuery] = useState('')
 
-    const [allTask, setAllTask] = useState<Task[]>([])
+    const [allTask, setAllTask] = useState<Task[]>([
+        {
+            id: '1',
+            name: 'Task 1',
+            description: 'Description for Task 1',
+            created_at: '2023-07-22T00:00:00.000Z',
+            updated_at: '2023-07-22T00:00:00.000Z',
+            completed: false,
+            category_id: 'category_1',
+            user_id: 'user_1',
+        },
+        {
+            id: '2',
+            name: 'Task 2',
+            description: 'Description for Task 2',
+            created_at: '2023-07-22T00:00:00.000Z',
+            updated_at: '2023-07-22T00:00:00.000Z',
+            completed: true,
+            category_id: 'category_2',
+            user_id: 'user_2',
+        },
+        {
+            id: '3',
+            name: 'Task 3',
+            description: 'Description for Task 3',
+            created_at: '2023-07-22T08:05:22.999Z',
+            updated_at: '2023-07-22T08:05:22.999Z',
+            completed: false,
+            category_id: 'category_1',
+            user_id: 'user_2',
+        },
+        {
+            id: '4',
+            name: 'Task 4',
+            description: 'Description for Task 4',
+            created_at: '2023-07-23T19:35:10.711Z',
+            updated_at: '2023-07-23T19:35:10.711Z',
+            completed: true,
+            category_id: 'category_3',
+            user_id: 'user_1',
+        },
+        {
+            id: '5',
+            name: 'Task 5',
+            description: 'Description for Task 5',
+            created_at: '2023-07-24T11:55:59.376Z',
+            updated_at: '2023-07-24T11:55:59.376Z',
+            completed: false,
+            category_id: 'category_2',
+            user_id: 'user_3',
+        },
+        {
+            id: '6',
+            name: 'Task 6',
+            description: 'Description for Task 6',
+            created_at: '2023-07-25T06:45:14.820Z',
+            updated_at: '2023-07-25T06:45:14.820Z',
+            completed: true,
+            category_id: 'category_1',
+            user_id: 'user_3',
+        },
+        {
+            id: '7',
+            name: 'Task 7',
+            description: 'Description for Task 7',
+            created_at: '2023-07-26T16:20:30.145Z',
+            updated_at: '2023-07-26T16:20:30.145Z',
+            completed: false,
+            category_id: 'category_2',
+            user_id: 'user_1',
+        },
+        {
+            id: '8',
+            name: 'Task 8',
+            description: 'Description for Task 8',
+            created_at: '2023-07-27T09:40:47.632Z',
+            updated_at: '2023-07-27T09:40:47.632Z',
+            completed: true,
+            category_id: 'category_1',
+            user_id: 'user_2',
+        },
+        {
+            id: '9',
+            name: 'Task 9',
+            description: 'Description for Task 9',
+            created_at: '2023-07-28T13:00:52.947Z',
+            updated_at: '2023-07-28T13:00:52.947Z',
+            completed: false,
+            category_id: 'category_3',
+            user_id: 'user_3',
+        },
+        {
+            id: '10',
+            name: 'Task 10',
+            description: 'Description for Task 10',
+            created_at: '2023-07-29T22:18:08.503Z',
+            updated_at: '2023-07-29T22:18:08.503Z',
+            completed: true,
+            category_id: 'category_2',
+            user_id: 'user_1',
+        },
+    ]
+    )
+
+    const currentDate = new Date().toISOString().substring(0, 10);
+
+    const todayTask = allTask.filter(task => {
+        const taskCreatedDateString = task.created_at.substring(0, 10);
+        return taskCreatedDateString === currentDate;
+    });
 
     const [allCategory, setAllCategory] = useState<Category[]>([])
-    
+
     const [taskForm, setTaskForm] = useState({
         name: '',
         description: '',
@@ -293,7 +401,7 @@ const Page = () => {
 
             <Header />
 
-            <AllTask allCategory={allCategory} updateCompleted={updateCompleted} setNewTask={setNewTask} openUpdateTask={openUpdateTask} task={filterSearch} deleteTask={deleteTask} setViewTask={setViewTask} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            <AllTask allCategory={allCategory} todayTask={todayTask} updateCompleted={updateCompleted} setNewTask={setNewTask} openUpdateTask={openUpdateTask} task={filterSearch} deleteTask={deleteTask} setViewTask={setViewTask} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
             {newTask && <TaskModal setTaskForm={setTaskForm} handleTaskForm={handleTaskForm} allCategory={allCategory} setNewTask={setNewTask} taskForm={taskForm} createTask={createTask} />}
 
