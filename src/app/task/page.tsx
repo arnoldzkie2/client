@@ -2,13 +2,13 @@
 'use client'
 import Header from '@/components/home/Header'
 import AllTask from '@/components/task/AllTask'
-import TaskModal from '@/components/task/NewTaskModal'
 import UpdateTaskModal from '@/components/task/UpdateTaskModal'
 import ViewTaskModal from '@/components/task/ViewTaskModal'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { Category } from '../category/page'
+import NewTaskModal from '@/components/task/NewTaskModal'
 
 
 interface User {
@@ -18,6 +18,7 @@ interface User {
 
 export interface Task {
     id: string
+    deadline: string
     name: string
     description: string
     created_at: string
@@ -39,109 +40,7 @@ const Page = () => {
 
     const [searchQuery, setSearchQuery] = useState('')
 
-    const [allTask, setAllTask] = useState<Task[]>([
-        {
-            id: '1',
-            name: 'Task 1',
-            description: 'Description for Task 1',
-            created_at: '2023-07-22T00:00:00.000Z',
-            updated_at: '2023-07-22T00:00:00.000Z',
-            completed: false,
-            category_id: 'category_1',
-            user_id: 'user_1',
-        },
-        {
-            id: '2',
-            name: 'Task 2',
-            description: 'Description for Task 2',
-            created_at: '2023-07-22T00:00:00.000Z',
-            updated_at: '2023-07-22T00:00:00.000Z',
-            completed: true,
-            category_id: 'category_2',
-            user_id: 'user_2',
-        },
-        {
-            id: '3',
-            name: 'Task 3',
-            description: 'Description for Task 3',
-            created_at: '2023-07-22T08:05:22.999Z',
-            updated_at: '2023-07-22T08:05:22.999Z',
-            completed: false,
-            category_id: 'category_1',
-            user_id: 'user_2',
-        },
-        {
-            id: '4',
-            name: 'Task 4',
-            description: 'Description for Task 4',
-            created_at: '2023-07-23T19:35:10.711Z',
-            updated_at: '2023-07-23T19:35:10.711Z',
-            completed: true,
-            category_id: 'category_3',
-            user_id: 'user_1',
-        },
-        {
-            id: '5',
-            name: 'Task 5',
-            description: 'Description for Task 5',
-            created_at: '2023-07-24T11:55:59.376Z',
-            updated_at: '2023-07-24T11:55:59.376Z',
-            completed: false,
-            category_id: 'category_2',
-            user_id: 'user_3',
-        },
-        {
-            id: '6',
-            name: 'Task 6',
-            description: 'Description for Task 6',
-            created_at: '2023-07-25T06:45:14.820Z',
-            updated_at: '2023-07-25T06:45:14.820Z',
-            completed: true,
-            category_id: 'category_1',
-            user_id: 'user_3',
-        },
-        {
-            id: '7',
-            name: 'Task 7',
-            description: 'Description for Task 7',
-            created_at: '2023-07-26T16:20:30.145Z',
-            updated_at: '2023-07-26T16:20:30.145Z',
-            completed: false,
-            category_id: 'category_2',
-            user_id: 'user_1',
-        },
-        {
-            id: '8',
-            name: 'Task 8',
-            description: 'Description for Task 8',
-            created_at: '2023-07-27T09:40:47.632Z',
-            updated_at: '2023-07-27T09:40:47.632Z',
-            completed: true,
-            category_id: 'category_1',
-            user_id: 'user_2',
-        },
-        {
-            id: '9',
-            name: 'Task 9',
-            description: 'Description for Task 9',
-            created_at: '2023-07-28T13:00:52.947Z',
-            updated_at: '2023-07-28T13:00:52.947Z',
-            completed: false,
-            category_id: 'category_3',
-            user_id: 'user_3',
-        },
-        {
-            id: '10',
-            name: 'Task 10',
-            description: 'Description for Task 10',
-            created_at: '2023-07-29T22:18:08.503Z',
-            updated_at: '2023-07-29T22:18:08.503Z',
-            completed: true,
-            category_id: 'category_2',
-            user_id: 'user_1',
-        },
-    ]
-    )
+    const [allTask, setAllTask] = useState<Task[]>([])
 
     const currentDate = new Date().toISOString().substring(0, 10);
 
@@ -154,6 +53,7 @@ const Page = () => {
 
     const [taskForm, setTaskForm] = useState({
         name: '',
+        deadline: '',
         description: '',
         category_id: ''
     })
@@ -161,6 +61,7 @@ const Page = () => {
     const [updateTaskForm, setUpdateTaskForm] = useState<Task>({
         id: '',
         name: '',
+        deadline: '',
         description: '',
         category_id: '',
         created_at: '',
@@ -171,6 +72,7 @@ const Page = () => {
 
     const [viewTask, setViewTask] = useState<Task>({
         id: '',
+        deadline: '',
         name: '',
         description: '',
         created_at: '',
@@ -186,11 +88,17 @@ const Page = () => {
 
         try {
 
-            const { data } = await axios.get(`${API_URL}/api/v1/tasks`, {
+            const { data, status } = await axios.get(`${API_URL}/api/v1/tasks`, {
                 headers: {
                     Authorization: user.token
                 }
             })
+
+            if (status === 401) {
+                localStorage.clear()
+                alert('session expired please sign in.')
+                router.push('/')
+            }
 
             setAllTask(data)
 
@@ -206,11 +114,17 @@ const Page = () => {
     const getAllCategory = async () => {
         try {
 
-            const { data } = await axios.get(`${API_URL}/api/v1/categories`, {
+            const { data, status } = await axios.get(`${API_URL}/api/v1/categories`, {
                 headers: {
                     Authorization: user.token
                 }
             })
+
+            if (status === 401) {
+                localStorage.clear()
+                alert('session expired please sign in.')
+                router.push('/')
+            }
 
             setAllCategory(data)
 
@@ -255,19 +169,30 @@ const Page = () => {
 
         const { name, description, category_id } = taskForm
 
+        if (!name) return alert('Title is required')
+        if (name.length < 3) return alert('Title is too short')
+        if (!description) return alert('Add description to your task')
+        if (!category_id) return alert('Choose category')
         try {
 
-            const { data } = await axios.post(`${API_URL}/api/v1/tasks`, { name, description, category_id }, {
+            const { data, status } = await axios.post(`${API_URL}/api/v1/tasks`, { name, description, category_id }, {
                 headers: {
                     Authorization: user.token
                 }
             })
+
+            if (status === 401) {
+                localStorage.clear()
+                alert('session expired please sign in.')
+                router.push('/')
+            }
 
             await getAllTask()
 
             setNewTask(false)
             setTaskForm({
                 name: '',
+                deadline: '',
                 description: '',
                 category_id: ''
             })
@@ -283,11 +208,17 @@ const Page = () => {
 
         try {
 
-            const { data } = await axios.delete(`${API_URL}/api/v1/tasks/${ID}`, {
+            const { data, status } = await axios.delete(`${API_URL}/api/v1/tasks/${ID}`, {
                 headers: {
                     Authorization: user.token
                 }
             })
+
+            if (status === 401) {
+                localStorage.clear()
+                alert('session expired please sign in.')
+                router.push('/')
+            }
 
             await getAllTask()
 
@@ -328,6 +259,7 @@ const Page = () => {
         setUpdateTaskForm({
             id: '',
             name: '',
+            deadline: '',
             description: '',
             category_id: '',
             created_at: '',
@@ -342,9 +274,15 @@ const Page = () => {
         e.preventDefault()
 
         const { id, completed, name, description, category_id } = updateTaskForm
+
+        if (!name) return alert('Title is required')
+        if (name.length < 3) return alert('Title is too short')
+        if (!description) return alert('Add description to your task')
+        if (!category_id) return alert('Choose category')
+
         try {
 
-            const { data } = await axios.patch(`${API_URL}/api/v1/tasks/${id}`, {
+            const { data, status } = await axios.patch(`${API_URL}/api/v1/tasks/${id}`, {
                 completed, name, description, category_id
             }, {
                 headers: {
@@ -352,11 +290,17 @@ const Page = () => {
                 }
             })
 
+            if (status === 401) {
+                localStorage.clear()
+                alert('session expired please sign in.')
+                router.push('/')
+            }
             await getAllTask()
 
             setUpdateTaskForm({
                 id: '',
                 name: '',
+                deadline: '',
                 description: '',
                 category_id: '',
                 created_at: '',
@@ -380,13 +324,19 @@ const Page = () => {
 
         try {
 
-            const { data } = await axios.patch(`${API_URL}/api/v1/tasks/${task.id}`, {
+            const { data, status } = await axios.patch(`${API_URL}/api/v1/tasks/${task.id}`, {
                 completed: !task.completed
             }, {
                 headers: {
                     Authorization: user.token
                 }
             })
+
+            if (status === 401) {
+                localStorage.clear()
+                alert('session expired please sign in.')
+                router.push('/')
+            }
 
             await getAllTask()
 
@@ -403,7 +353,7 @@ const Page = () => {
 
             <AllTask allCategory={allCategory} todayTask={todayTask} updateCompleted={updateCompleted} setNewTask={setNewTask} openUpdateTask={openUpdateTask} task={filterSearch} deleteTask={deleteTask} setViewTask={setViewTask} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-            {newTask && <TaskModal setTaskForm={setTaskForm} handleTaskForm={handleTaskForm} allCategory={allCategory} setNewTask={setNewTask} taskForm={taskForm} createTask={createTask} />}
+            {newTask && <NewTaskModal setTaskForm={setTaskForm} handleTaskForm={handleTaskForm} allCategory={allCategory} setNewTask={setNewTask} taskForm={taskForm} createTask={createTask} />}
 
             {viewTask.name && <ViewTaskModal task={viewTask} allCategory={allCategory} setViewTask={setViewTask} />}
 

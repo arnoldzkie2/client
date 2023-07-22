@@ -50,6 +50,7 @@ const LandingHeader = () => {
         }
 
     }, [user])
+    
     return (
 
         <header className='fixed top-0 left-0 w-screen px-5 sm:px-10 md:px-16 lg:px-24 xl:px-36 h-20 flex items-center shadow-lg bg-white'>
